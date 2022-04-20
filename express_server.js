@@ -2,16 +2,17 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
-let generateRandomString = (len, arr) => {
-  let ans = '';
-  for (let i = len; i > 0; i--) {
-    ans +=
-        arr[Math.floor(Math.random() * arr.length)];
+let generateRandomString = (n) => {
+  let randomString = '';
+  let characters = '0123456789abcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < n; i++) {
+    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-  return ans;
+  return randomString;
 };
 
-generateRandomString();
+
 
 
 
@@ -30,8 +31,10 @@ app.get("/", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const longURL = req.body.longURL;
+  const shortURL = generateRandomString(6);
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -46,14 +49,19 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  res.render("urls_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
-});
-
-app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
-  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
