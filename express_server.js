@@ -4,8 +4,8 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
 
@@ -21,6 +21,16 @@ let generateRandomString = (n) => {
     randomString += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return randomString;
+};
+
+const urlsForUser = (id) => {
+  let filtered = {};
+  for (let urlID of Object.keys(urlDatabase)) {
+    if (urlDatabase[urlID].userID === id) {
+      filtered[urlID] = urlDatabase[urlID];
+    }
+  }
+  return filtered;
 };
 
 const users = {
@@ -46,13 +56,6 @@ const addUser = (email, password) => {
   return id;
 };
 
-const checkRegistration = (email, password) => {
-  if (email && password) {
-    return true;
-  }
-  return false;
-};
-
 const findUser = email => {
   return Object.values(users).find(user => user.email === email);
 };
@@ -70,7 +73,6 @@ const checkPassword= (user, password) => {
 
 
 
-app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -83,21 +85,33 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     user: users[req.cookies["user_id"]],
-    urls: urlDatabase
+    urls: urlsForUser(req.cookies["user_id"])
   };
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
+  const userID = req.cookies['user_id'];
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
-  res.render("urls_new", templateVars);
+app.get("/urls2.json", (req, res) => {
+  res.json(users);
+});
+
+app.get("/urls", (req, res) => {
+  let templateVars = {
+    user: users[req.cookies["user_id"]],
+    urls: urlsForUser(req.cookies["user_id"])
+  };
+  if (templateVars.user) {
+    res.render("urls_index", templateVars);
+  } else {
+    res.status(400).send("You need to login or register to access this page");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -117,12 +131,26 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL] 
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
+  if (!templateVars.user) {
+    res.status(400).send("You need to register or login to access this page");
+  }
+  if (req.cookies["user_id"] === urlDatabase[templateVars.shortURL].userID) {
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(400).send("This TinyURL doesn't belong to you!");
+  }
+});
 
 app.post("/urls/:shortURL/delete", (req,res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  const shortURL = req.params.shortURL;
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.status(400).send("You are not allowed to delete that TinyURL!");
+  }
 });
 
 app.get("/urls", (req, res) => {
@@ -134,11 +162,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/u/:shortURL", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    urlDatabase[shortURL].longURL = longURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(400).send("Your are not allowed to edit that TinyURL!")
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -171,7 +203,7 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  if (!checkRegistration(email, password)) {
+  if (!email || !password) {
     res.status(400).send('Email and/or password is missing');
   } else if (findUser(email)) {
     res.status(400).send('This email has already been registered');
@@ -181,8 +213,6 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
   }
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
