@@ -1,8 +1,6 @@
 /* eslint-disable camelcase */
 
 
-
-
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -11,9 +9,23 @@ const bcryptjs = require('bcryptjs');
 const cookieSession = require('cookie-session');
 
 // -----------------FOR SOME REASON, COULD NOT LINK HELPERS.JS AND DATABASE.JS WITHOUT ERROR----------------- //
-const urlDatabase = {};
-const users = {};
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 
 const getUserByEmail = (email, database) => {
   return Object.values(database).find(user => user.email === email);
@@ -87,6 +99,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
@@ -113,33 +126,45 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+app.post("/urls/new", (req, res) => {
+  console.log(req.body);
+  const longURL = req.body.longURL;
+  const userID = req.session.user_id;
+  const newURL = addURL(longURL, userID, urlDatabase);
+  res.redirect(`/urls/${newURL}`);
+});
+
+
 // URLS/:SHORTURL
 app.get("/urls/:shortURL", (req, res) => {
-  if (!urlDatabase[req.params.shortURL]) {
+  const shortURL = req.params.shortURL;
+  const userID = req.session.user_id;
+  if (!urlDatabase[shortURL]) {
     let templateVars = {
       status: 404,
       message: 'TinyURL has not yet been born!!!',
-      user: users[req.session.user_id]
     };
     res.status(404);
     res.render("urls_error", templateVars);
-  }
-  let templateVars = {
-    user: users[req.session.user_id],
-    shortURL: req.params.shortURL,
-    urls: urlDatabase,
-  };
-  if (req.session.user_id === urlDatabase[templateVars.shortURL].user_id) {
-    res.render("urls_show", templateVars);
   } else {
-    let templateVars = {
-      status: 401,
-      message: "Not your tinyURL",
-      user: users[req.session.user_id]
-    };
-    res.status(401);
-    res.render("urls_error", templateVars);
+    const longURL = urlDatabase[shortURL].longURL;
+    let templateVars = {user: userID, urls: urlsForUser(userID), longURL, shortURL};
+    res.render("urls_show", templateVars);
   }
+  // let templateVars = {
+  //   shortURL: req.params.shortURL,
+  //   urls: urlDatabase,
+  // };
+  // if (req.session.user_id === urlDatabase[templateVars.shortURL].user_id) {
+  //   res.render("urls_show", templateVars);
+  // } else {
+  //   let templateVars = {
+  //     status: 401,
+  //     message: "Not your tinyURL",
+  //   };
+  //   res.status(401);
+  //   res.render("urls_error", templateVars);
+  // }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -274,11 +299,12 @@ app.get("/register", (req,res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+  let user = {email: 'undefined'};
   if (!email || !password) {
     let templateVars = {
-      status: 401,
+      status: 400,
       message: "so... your email and/or password is missing...",
-      user: users[req.session.user_id]
+      user
     };
     res.status(401);
     res.render("urls_error", templateVars);
