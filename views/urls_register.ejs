@@ -12,16 +12,16 @@
 
   <body>
     <header>
-      <% include ./partials/_header %>
+      <% include ('./partials/_header.ejs') %>
     </header>
     <main style="margin: 1em;">
       <h3>Create account</h3>
       <form class="form justify-content-center" action="/register" method="POST">
         <div class="form-group mb-2">
           <label for="email" style="margin-top: 1.5em;">Email address</label>
-          <input class="form-control" type="email" name="email" placeholder="user@example.com" style="width: 300px">
+          <input class="form-control" type="email" name="email" placeholder="user@example.com" style="width: 400px">
           <label for="password" style="margin-top: 1.5em;">Password</label>
-          <input class="form-control" type="password" name="password" placeholder="password" style="width: 300px">
+          <input class="form-control" type="password" name="password" placeholder="password" style="width: 400px">
           <button type="submit" class="btn btn-info" style="margin-top: 1.5em">Register</button>
         </div>
       </form>

@@ -1,6 +1,18 @@
 const bcrypt = require('bcryptjs');
 const {urlDatabase, users} = require('./database');
 
+let generateRandomString = (n) => {
+  let randomString = '';
+  let characters = '0123456789abcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < n; i++) {
+    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return randomString;
+};
+
+module.exports = {generateRandomString};
+
 const getUserByEmail = (email, database) => {
   return Object.values(database).find(user => user.email === email);
 };
@@ -20,6 +32,19 @@ const urlsForUser = (id) => {
 
 module.exports = {urlsForUser};
 
+const addUser = (email, password) => {
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  const id = generateRandomString();
+  users[id] = {
+    id,
+    email,
+    password: hashedPassword
+  };
+  return id;
+};
+
+module.exports = {addUser};
+
 const addURL = (longURL, userID, db) => {
   const dateCreation = new Date();
   const visitCount = 0;
@@ -33,27 +58,5 @@ const addURL = (longURL, userID, db) => {
 
 module.exports = {addURL};
 
-let generateRandomString = (n) => {
-  let randomString = '';
-  let characters = '0123456789abcdefghijklmnopqrstuvwxyz0123456789';
 
-  for (let i = 0; i < n; i++) {
-    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return randomString;
-};
 
-module.exports = {generateRandomString};
-
-const addUser = (email, password) => {
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const id = generateRandomString();
-  users[id] = {
-    id,
-    email,
-    password: hashedPassword
-  };
-  return id;
-};
-
-module.exports = {addUser};

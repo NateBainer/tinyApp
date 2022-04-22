@@ -1,5 +1,6 @@
 const { assert } = require('chai');
-const { getUserByEmail } = require('../helpers.js');
+
+const { getUserByEmail } = require('../express_server.js');
 
 const testUsers = {
   "userRandomID": {
@@ -15,13 +16,9 @@ const testUsers = {
 };
 
 describe('getUserByEmail', function() {
-  it('return a user when presented with a valid email', function() {
-    const user = getUserByEmail("user2@example.com", testUsers);
-    const expectedOutput = testUsers.user2RandomID;
-    assert.equal(user, expectedOutput);
-  });
-  it('return undefined when presented with an invalid email', function() {
-    const user = getUserByEmail("user3@example.com", testUsers);
-    assert.equal(user, undefined);
+  it('should return a user with valid email', function() {
+    const user = getUserByEmail("user@example.com", testUsers);
+    const expectedUserID = "userRandomID";
+    // Write your assert statement here
   });
 });
