@@ -88,17 +88,16 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  if (!req.session.user_id) {
+  const userID = req.session.user_id;
+  if (!userID) {
     let templateVars = {
       status: 401,
       message: 'Hey, Fool! You need to login first!',
-      user: users[req.session.user_id]
     };
     res.status(401);
     res.render("urls_error", templateVars);
   } else {
     const longURL = req.body.longURL;
-    const userID = req.session.user_id;
     const shortURL = addURL(longURL, userID, urlDatabase);
     res.redirect(`/urls/${shortURL}`);
   }
@@ -135,7 +134,7 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
     let templateVars = {
       status: 401,
-      message: "This ain't yo' TinyURL! nuh UH!!!",
+      message: "Not your tinyURL",
       user: users[req.session.user_id]
     };
     res.status(401);
