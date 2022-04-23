@@ -6,28 +6,60 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Pacifico&display=swap" rel="stylesheet">
   <title>TinyApp</title>
 </head>
 <body>
+
+    <%- include ('partials/_header') %>
+
   <main style="margin: 1em;">
+    <% if (user) { %>
     <h3>My URLs</h3>
     <table class="table">
       <thead>
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Date of creation</th>
+          <th scope="col">Visits</th>
+          <th scope="col">Unique visitors</th>
         </tr>
       </thead>
       <tbody>
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url] %></td>
-            <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-primary">Delete</button></form></td>
+            <td><%= urls[url].longURL %></td>
+            <td><%= urls[url].dateCreation.toLocaleDateString() %>, <%= urls[url].dateCreation.toLocaleTimeString() %></td>
+            <td style = "text-align: center"><%= urls[url].visitCount %></td>
+            <td style = "text-align: center"><%= urls[url].uVisitCount %></td>
+            <td>
+                <form method="GET" action="/urls/<%= url %>">
+                  <button type="submit" class="btn btn-outline-primary">Edit</button>
+                </form>
+            </td>
+            <td>
+              <form method="POST" action="/urls/<%= url %>/delete">
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
+              </form>
+            </td>
           </tr>
         <% } %>
       </tbody>
     </table>
+    <% } else { %>
+      <h3 style="text-align: center">Welcome to TinyApp!</h3>
+      <p style="text-align: center">To benefit from the awesome features of TinyApp, you need to first log in or register</h3>
+      <div class="form-inline justify-content-center">
+        <form class="form-inline" action="/login" method="GET">
+          <button type="submit" class="btn btn-info" style="margin-right: 2em; margin-top: 3em;">Login</button>
+        </form>
+        <form class="form-inline" action="/register" method="GET">
+          <button type="submit" class="btn btn-info" style="margin-top: 3em;">Register</button>
+        </form>
+      </div>
+    <% } %>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

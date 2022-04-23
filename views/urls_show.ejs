@@ -3,20 +3,48 @@
 <head>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Pacifico&display=swap" rel="stylesheet">
   <title>URL - TinyApp Example</title>
 </head>
 
 <body>
-  <header>
-    <%- include('partials/_header') %>
-  </header>
+
+    <%- include ('partials/_header') %>
+
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL for: <%= urls[shortURL].longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+        <p class="card-text">Date of creation: <%= urls[shortURL].dateCreation.toLocaleDateString() %>, <%= urls[shortURL].dateCreation.toLocaleTimeString() %></a></p>
+        <p class="card-text">Number of visits: <%= urls[shortURL].visitCount %></a></p>
+        <p class="card-text">Number of unique visitors: <%= urls[shortURL].uVisitCount %></a></p>
       </div>
-    <div class="card-footer text-muted"></div>
+      <div class="card-footer text-muted">
+        <h2>Edit</h2>
+        <form class="form-inline justify-content-center"  action="/urls/<%= shortURL %>" method=POST>
+          <label for="longURL">New URL:</label>
+          <input class="form-control" type="text" name="longURL" placeholder="http://" style="margin: 1em">
+          <button type="submit" class="btn btn-info">Submit</button>
+        </form>
+      </div>
+      <h3 style="text-align:left; margin-top:1em; margin-left:2em;">Visits History</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Visitor ID</th>
+            <th scope="col">Date of visit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(let visit of urls[shortURL].visitHistory) { %>
+            <tr>
+              <td><%= visit[1] %></td>
+              <td><%= visit[0].toLocaleDateString() %>, <%= visit[0].toLocaleTimeString() %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
