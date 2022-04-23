@@ -61,3 +61,6 @@ NEWS SECTION
     Hopefully the war between Russia and Ukraine doesn't end up in a World War?
     Man, why doesn't everyone just better their fellow person?
     I wish world leaders were more like Carl Sagan, that guy was an absolute G.
+
+
+!["screenshot description"](docs/picture1.png) 
