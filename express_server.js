@@ -149,20 +149,6 @@ app.get("/urls/:shortURL", (req, res) => {
     let templateVars = {user: userID, urls: urlsForUser(userID), longURL, shortURL};
     res.render("urls_show", templateVars);
   }
-  // let templateVars = {
-  //   shortURL: req.params.shortURL,
-  //   urls: urlDatabase,
-  // };
-  // if (req.session.user_id === urlDatabase[templateVars.shortURL].user_id) {
-  //   res.render("urls_show", templateVars);
-  // } else {
-  //   let templateVars = {
-  //     status: 401,
-  //     message: "Not your tinyURL",
-  //   };
-  //   res.status(401);
-  //   res.render("urls_error", templateVars);
-  // }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
